@@ -266,7 +266,7 @@ public class Modem {
 	private String helloMessage(final boolean modeEncapsulation) {
 		return "AT$IMEI=" + imei + ",PSW=" + settings.getPsw() + ",TYP=" + settings.getTyp() + ",DEV=" + settings.getDev() + 
 				",VER=" + settings.getVer() + ",REV=" + settings.getRev() + ",BLD=" + settings.getBld() + ",HDW=" + settings.getHdw() + 
-				",SIM=" + settings.getSim() + ",CSQ=" + settings.getStringCsq() + (modeEncapsulation ? ",COLPROT=1.2" + settings.getChannel() : "") +
+				",SIM=" + settings.getSim() + ",CSQ=" + settings.getStringCsq() + (modeEncapsulation ? ",COLPROT=1.2" : "") +
 				",ATP=" + settings.getAtp() + ",INT=" + settings.getInp() + (settings.getChannel() > 0 ? ",CHN=" + settings.getChannel() : "") +
 				(settings.isModeServer() ? ",MOD=SRV,IP=" + settings.getServerAddress().split(":", 2)[0] + 
 					",PORT=" + settings.getServerAddress().split(":", 2)[1] : "") + ",\n";
