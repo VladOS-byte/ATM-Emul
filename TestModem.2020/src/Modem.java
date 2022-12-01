@@ -136,8 +136,8 @@ public class Modem {
 			if (isLegalStartLog(firstLog)) {
 				String modeOfAnswer = firstLog.substring(19, 22);
 				boolean modeSet = modeOfAnswer.equals("SET");
-				if (modeOfAnswer.equals("DAT") || Math.abs(settings.getChannel()) == 1) {
-					while (!socket.isClosed() && socket.getInetAddress().isReachable(5_000)) {
+				if (modeOfAnswer.equals("DAT") || Math.abs(settings.getChannel()) != 1) {
+					while (!socket.isClosed()) {
 						byte[] data = sender.getByteMessage(socket);
 						if (data == null) {
 							Thread.sleep(5000);
@@ -213,7 +213,7 @@ public class Modem {
 	
 	private void sendDataPackage(final Socket socket, final byte[] data) throws IOException, InterruptedException {
 		if (data.length != dataSize + (settings.isModeEncapsulation() ? 20 : 0)) {
-			log("MODEM: DATA SIZE WRONG: " + data.length);
+			log("MODEM: DATA SIZE WRONG: " + data.length + ". EXPECTED SIZE: " + (dataSize + (settings.isModeEncapsulation() ? 20 : 0)));
 			Thread.sleep(5000);
 		} else {
 			lastSend = sender.sendMessage(socket, data);

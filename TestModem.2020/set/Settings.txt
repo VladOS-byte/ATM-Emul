@@ -14,10 +14,10 @@
 <true>						//Mode of encapsulation
 <true>						//Mode server
 <127.0.0.1:5000>					//Server address {must ':'} {without binding}
-<1>						//Size of data package [1; 1180]
+<1024>						//Size of data package [2; 1180]
 <1>						//minimum timeout of server's sending
 <2>						//maximum timeout of server's sending
-<false>						//Mode of data sending
+<true>						//Mode of data sending
 <F>						//F - off; T - on; R - randomly by CSQ;
 <0>						//temperature of module [-100; 125] / else randomly
 <false>						//Mode of SET

@@ -26,7 +26,7 @@ public class Settings {
 	private final boolean modeEncapsulation = true;			//Mode of encapsulation
 	private final boolean modeServer = false;				//Mode of server
 	private final String serverAddress = "127.0.0.1:5000";	//Mode of encapsulation
-	private int dataSize = 1;								//Size of data package [1; 1180]
+	private int dataSize = 1024;							//Size of data package [1; 1180]
 	private final int minTO = 1;							//minimum timeout of server's sending
 	private final int maxTO = 2;							//maximum timeout of server's sending
 	private boolean modeData = false;						//Mode of data sending
@@ -178,7 +178,7 @@ public class Settings {
 		int tmp = Integer.parseInt(getOrDefault(16, String.valueOf(dataSize)));
 		if (tmp > 1448) {
 			tmp = 1448;
-		} else if (dataSize < 2) {
+		} else if (tmp < 2) {
 			tmp = 2;
 		}
 		return tmp;
