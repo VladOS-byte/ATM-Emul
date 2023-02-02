@@ -6,27 +6,27 @@ import java.util.regex.Pattern;
 
 public class Modem {
 	//modem.info
-	private final String imei;
+	protected final String imei;
 	
-	private final int port;
+	protected final int port;
 	//modem.settings
-	private final Settings settings;
+	protected final Settings settings;
 	
-	private final Logger logger;
+	protected final Logger logger;
 	
-	private final int dataSize;
+	protected final int dataSize;
 	
-	private final Random random = new Random();
-	private final Sender sender = new Sender();
+	protected final Random random = new Random();
+	protected final Sender sender = new Sender();
 	
-	private long lastSend;
+	protected long lastSend;
 	
-	private byte[] keepAliveMessage = {(byte) 0xB5, (byte) 0xBC, (byte) 0xBD, (byte) 0xBE, (byte) 0xBF};
+	protected static final byte[] keepAliveMessage = {(byte) 0xB5, (byte) 0xBC, (byte) 0xBD, (byte) 0xBE, (byte) 0xBF};
 	
-	private byte[] prefix = {(byte) 0xC8, (byte) 0xCA, (byte) 0xCB, (byte) 0xCC, (byte) 0xCD};
+	protected static final byte[] prefix = {(byte) 0xC8, (byte) 0xCA, (byte) 0xCB, (byte) 0xCC, (byte) 0xCD};
 	
-	private byte[] suffix = {(byte) '\r', (byte) '\n'};
-	private boolean needUpdateGpio = false;
+	protected static final byte[] suffix = {(byte) '\r', (byte) '\n'};
+	protected boolean needUpdateGpio = false;
 	
 	
 	public Modem(final String imei, final int port, final Settings settings, final Logger logger) {
@@ -255,7 +255,7 @@ public class Modem {
 		}
 	}
 	
-	private <T> byte[] toBytes(T counter) {
+	protected <T> byte[] toBytes(T counter) {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		for (char c : counter.toString().toCharArray()) {
 			baos.write((byte) c);
@@ -263,7 +263,7 @@ public class Modem {
 		return baos.toByteArray();
 	}
 	
-	private String helloMessage(final boolean modeEncapsulation) {
+	protected String helloMessage(final boolean modeEncapsulation) {
 		return "AT$IMEI=" + imei + ",PSW=" + settings.getPsw() + ",TYP=" + settings.getTyp() + ",DEV=" + settings.getDev() + 
 				",VER=" + settings.getVer() + ",REV=" + settings.getRev() + ",BLD=" + settings.getBld() + ",HDW=" + settings.getHdw() + 
 				",SIM=" + settings.getSim() + ",CSQ=" + settings.getStringCsq() + (modeEncapsulation ? ",COLPROT=1.2" : "") +
@@ -272,7 +272,7 @@ public class Modem {
 					",PORT=" + settings.getServerAddress().split(":", 2)[1] : "") + ",\n";
 	}
 	
-	private byte[] createMessage(byte [] ...args) {
+	protected byte[] createMessage(byte [] ...args) {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		try {
 			baos.write(prefix);
@@ -288,7 +288,7 @@ public class Modem {
 		return baos.toByteArray();
 	}
 	
-	private void log(final String message) {
+	protected void log(final String message) {
 		// System.out.println(imei + ": " + message);
 		logger.log(imei, message);
 	}

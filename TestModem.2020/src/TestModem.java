@@ -5,6 +5,13 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 public class TestModem {
+
+	private static final Set<Character> modes = Set.of(
+		'F', //M + S
+		'M', //Modem
+		'S', //Server
+		'R'  //Router
+	);
 	
 	public static void main(String[] args) throws IOException {
 		
@@ -72,7 +79,7 @@ public class TestModem {
 			return;
 		}
 		
-		if (mode != 'F' && mode != 'M' && mode != 'S') {
+		if (!modes.contains(mode)) {
 			System.out.println("UNKNOWN MODE '" + mode + "'");
 			return;
 		}
@@ -111,10 +118,15 @@ public class TestModem {
 					String imei = item.getKey();
 					Modem m = null;
 					Server s = null;
-					if (mode != 'S') {
+
+					if (mode == 'R') {
+						imei = "TEST" + imei.substring(10);
+						m = new Router(imei, Integer.parseInt(item.getValue().getKey()), item.getValue().getValue(), logger);
+					} else if (mode != 'S') {
 						m = new Modem(imei, Integer.parseInt(item.getValue().getKey()), item.getValue().getValue(), logger);
 					}
-					if (mode != 'M') {
+
+					if (mode != 'M' && mode != 'R') {
 						s = new Server(imei, Integer.parseInt(item.getValue().getKey()), item.getValue().getValue(), logger);
 					}
 					modems.put(imei, new Pair<>(m, s));
