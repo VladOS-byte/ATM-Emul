@@ -143,7 +143,7 @@ public class TestModem {
 				while (true) {
 					String cmd = sc.nextLine();
 					String command = cmd.toUpperCase();
-					if ((mode == 'M' || mode == 'F') && Pattern.matches("[0-9]{16} MODEDATA (ON|OFF)", command)) {
+					if ((mode != 'R') && Pattern.matches("[0-9]{16} MODEDATA (ON|OFF)", command)) {
 						Pair<String, Settings> item = items.get(command.substring(0, 16));
 						if (item != null) {
 							item.getValue().setModeData(command.charAt(27) == 'N');
