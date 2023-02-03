@@ -138,6 +138,8 @@ public class TestModem {
 					System.out.println("OPTIONS:\nexit\nsend something (JSON): TEST[0-9]{6} SEND (.+)");
 				} else if (mode != 'S') {
 					System.out.println("OPTIONS:\nexit\ndata turn on/off: <imei> MODEDATA ON/OFF\ngpio turn input, output: <imei> GPIO <x> SET <y: [0 - I(0), 1 - I(1), 2 - O(0), 3 - O(1)]>");
+				} else {
+					System.out.println("OPTIONS:\nexit\ndata turn on/off: <imei> MODEDATA ON/OFF>");
 				}
 				
 				while (true) {
@@ -177,6 +179,8 @@ public class TestModem {
 						System.out.println("OPTIONS:\nexit\nsend something (JSON): TEST[0-9]{6} SEND (.+)");
 					} else if (mode != 'S') {
 						System.out.println("OPTIONS:\nexit\ndata turn on/off: <imei> MODEDATA ON/OFF\ngpio turn input, output: <imei> GPIO <x> SET <y: [0 - I(0), 1 - I(1), 2 - O(0), 3 - O(1)]>");
+					} else {
+						System.out.println("OPTIONS:\nexit\ndata turn on/off: <imei> MODEDATA ON/OFF>");
 					}
 				}
 			} catch (InterruptedException | NoSuchElementException e) {
