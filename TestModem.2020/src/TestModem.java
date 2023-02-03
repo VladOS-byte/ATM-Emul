@@ -103,7 +103,8 @@ public class TestModem {
 				
 				for (long i = differenceImei; i < countModems + differenceImei; i++) {
 					Settings settings = new Settings(set);
-					items.put(String.valueOf(1000_000_000_000_000L + i),
+					String imei = String.valueOf(1000_000_000_000_000L + i);
+					items.put(mode == 'R' ? "TEST" + imei.substring(10) : imei,
 							new Pair<String, Settings>(String.valueOf((settings.getPort() + i) % 65536), settings));
 				}
 				
@@ -120,7 +121,6 @@ public class TestModem {
 					Server s = null;
 
 					if (mode == 'R') {
-						imei = "TEST" + imei.substring(10);
 						m = new Router(imei, Integer.parseInt(item.getValue().getKey()), item.getValue().getValue(), logger);
 					} else if (mode != 'S') {
 						m = new Modem(imei, Integer.parseInt(item.getValue().getKey()), item.getValue().getValue(), logger);
@@ -134,17 +134,22 @@ public class TestModem {
 
 				System.out.println("Done");
 				System.out.println("");
-				System.out.println("OPTIONS:\nexit\ndata turn on/off: <imei> MODEDATA ON/OFF\ngpio turn input, output: <imei> GPIO <x> SET <y: [0 - I(0), 1 - I(1), 2 - O(0), 3 - O(1)]>");
+				if (mode == 'R') {
+					System.out.println("OPTIONS:\nexit\nsend something (JSON): TEST[0-9]{6} SEND (.+)");
+				} else if (mode != 'S') {
+					System.out.println("OPTIONS:\nexit\ndata turn on/off: <imei> MODEDATA ON/OFF\ngpio turn input, output: <imei> GPIO <x> SET <y: [0 - I(0), 1 - I(1), 2 - O(0), 3 - O(1)]>");
+				}
 				
 				while (true) {
-					String command = sc.nextLine().toUpperCase();
-					if (Pattern.matches("[0-9]{16} MODEDATA (ON|OFF)", command)) {
+					String cmd = sc.nextLine();
+					String command = cmd.toUpperCase();
+					if ((mode == 'M' || mode == 'F') && Pattern.matches("[0-9]{16} MODEDATA (ON|OFF)", command)) {
 						Pair<String, Settings> item = items.get(command.substring(0, 16));
 						if (item != null) {
 							item.getValue().setModeData(command.charAt(27) == 'N');
 							System.out.println("MODEDATA TURN " + (command.charAt(27) == 'N' ? "IN" : "OUT"));
 						}
-					} else if (Pattern.matches("[0-9]{16} GPIO [1-4] SET [0-3]", command)) {
+					} else if ((mode == 'M' || mode == 'F') && Pattern.matches("[0-9]{16} GPIO [1-4] SET [0-3]", command)) {
 						String imei = command.substring(0, 16);
 						Pair<String, Settings> item = items.get(imei);
 						Pair<Modem, Server> modemPair = modems.get(imei);
@@ -153,12 +158,26 @@ public class TestModem {
 							modemPair.getKey().sendGpio();
 							System.out.println("GPIO " + command.charAt(22) + " TURN " + (command.charAt(28) != '2' ? "IN" + command.charAt(28) : "OUT"));
 						}
+					} else if (mode == 'R' && Pattern.matches("TEST[0-9]{6} SEND (.+)", command)) {
+						String imei = cmd.substring(0, 10);
+						Pair<String, Settings> item = items.get(imei);
+						Pair<Modem, Server> modemPair = modems.get(imei);
+						if (item != null && modemPair != null && modemPair.getKey() != null) {
+							modemPair.getKey().sendCommand(cmd.substring(15).trim());
+							System.out.println("Send: " + cmd.substring(15).trim());
+						}
 					} else if (command.equalsIgnoreCase("exit")) {
 						sc.close();
 						System.out.println("Bye");
 						return;
+					} else {
+						System.out.println("UnsupportedOperationException [command: " + command + "]");
 					}
-					System.out.println("OPTIONS:\nexit\ndata turn on/off: <imei> MODEDATA ON/OFF\ngpio turn input, output: <imei> GPIO <x> SET <y: [0 - I(0), 1 - I(1), 2 - O(0), 3 - O(1)]>");
+					if (mode == 'R') {
+						System.out.println("OPTIONS:\nexit\nsend something (JSON): TEST[0-9]{6} SEND (.+)");
+					} else if (mode != 'S') {
+						System.out.println("OPTIONS:\nexit\ndata turn on/off: <imei> MODEDATA ON/OFF\ngpio turn input, output: <imei> GPIO <x> SET <y: [0 - I(0), 1 - I(1), 2 - O(0), 3 - O(1)]>");
+					}
 				}
 			} catch (InterruptedException | NoSuchElementException e) {
 				System.out.println("PROGRAM INTERRUPTED");

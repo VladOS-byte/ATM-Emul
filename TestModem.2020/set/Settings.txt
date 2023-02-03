@@ -9,7 +9,7 @@
 <0>						//CSQ (1-31); 0 - random
 <1.1>						//ATP?
 <485+232>					//Interface
-<127.0.0.1>					//Host IRZ Collector
+<192.168.245.99>					//Host IRZ Collector
 <11003>						//Port IRZ Collector
 <true>						//Mode of encapsulation
 <true>						//Mode server
@@ -24,5 +24,5 @@
 <false>						//Mode of FRM
 <35000>						//port
 <0000>						//initial GPIO state
-<10>						//Control timer [10; 120] {no any guarantees} = double keep alive. 50 = disable double
+<50>						//Control timer [10; 120] {no any guarantees} = double keep alive. 50 = disable double
 <1>						//Channel {-1;[1-5]} -1 = NA

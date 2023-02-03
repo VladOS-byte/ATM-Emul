@@ -173,6 +173,10 @@ public class Modem {
 	public void sendGpio() {
 		needUpdateGpio = true;
 	}
+
+	public void sendCommand(String s) {
+		needUpdateGpio = true;
+	}
 	
 	private void doCommand(final Socket socket, final byte command) throws IOException, InterruptedException {
 		Pair<byte[], byte[]> answer = null;
