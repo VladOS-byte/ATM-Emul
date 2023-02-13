@@ -88,9 +88,10 @@ public class Modem {
 							while (settings.getKeepTime() > System.currentTimeMillis() - lastSend) {
 								Thread.sleep(5000);
 
-								needUpdateGpio |= 
-									System.currentTimeMillis() - gpioLastSend > 
-										settings.getGpioChangeTimeout() * 1000;
+								if (System.currentTimeMillis() - gpioLastSend > settings.getGpioChangeTimeout() * 1000) {
+									needUpdateGpio = true;
+									settings.setGpioX(random.nextInt(3) + 1, random.nextInt(3));
+								}
 
 								if (needUpdateGpio) {
 									gpioLastSend = System.currentTimeMillis();
