@@ -20,6 +20,7 @@ public class Modem {
 	protected final Sender sender = new Sender();
 	
 	protected long lastSend;
+	protected long gpioLastSend = 0L;
 	
 	protected static final byte[] keepAliveMessage = {(byte) 0xB5, (byte) 0xBC, (byte) 0xBD, (byte) 0xBE, (byte) 0xBF};
 	
@@ -86,7 +87,13 @@ public class Modem {
 						while (!socket.isClosed() && socket.getInetAddress().isReachable(5_000)) {
 							while (settings.getKeepTime() > System.currentTimeMillis() - lastSend) {
 								Thread.sleep(5000);
+
+								needUpdateGpio |= 
+									System.currentTimeMillis() - gpioLastSend > 
+										settings.getGpioChangeTimeout() * 1000;
+
 								if (needUpdateGpio) {
+									gpioLastSend = System.currentTimeMillis();
 									doCommand(socket, (byte) 0x02);
 									needUpdateGpio = false;
 								}

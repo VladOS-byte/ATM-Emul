@@ -1,49 +1,62 @@
 import java.io.*;
 import java.net.Socket;
-import java.util.Random;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.lang.Process;
+import java.lang.ProcessBuilder;
 import java.net.*;
 import java.util.zip.*;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Router extends Modem {
 
+	public static final AtomicBoolean staticRouter = new AtomicBoolean();
 	public static final AtomicBoolean connected = new AtomicBoolean();
-	private Process nc;
 	protected String cmd = "";
-	
+	public static OutputStream w;
+	private static final Map<String, Long> lastSends = new ConcurrentHashMap<>();
+	private static Settings sets;
+
 	public Router(final String imei, final int port, final Settings settings, final Logger logger) {
 		super(imei, port, settings, logger);
+		sets = settings;
 	}
 
 	@Override
 	public void secondConnect() {
+		String[] hm = helloMessage(false).split("\n");
 		lastSend = System.currentTimeMillis();
+		lastSends.put(imei, lastSend);
+
+		if (!staticRouter.compareAndSet(false, true)) {
+			for (String h : hm) 
+				try {
+					send(imei, h);
+				} catch (IOException | InterruptedException e) {
+					System.out.println("err0: " + e.getMessage());
+					log("ROUTER: SOCKET FAILURE");
+					break;
+				}
+			return;
+		}
+
 		while (true) {
 			connected.set(false);
 			try {
-				nc = Runtime.getRuntime().exec("nc -u " + settings.getHostMainServer() + " " + settings.getPortMainServer());
-				final OutputStream w = nc.getOutputStream();
-				
-				String[] hm = helloMessage(false).split("\n");
-				for (String h : hm)
-					send(w, h);
 
 				Thread t = new Thread(() -> {
 					try {
 						while (!connected.get()) {
-							while (!this.needUpdateGpio && settings.getKeepTime() > System.currentTimeMillis() - lastSend) {
-								Thread.sleep(5000);
+							Thread.sleep(5000);
+
+							for (Map.Entry<String, Long> im : lastSends.entrySet()) {
+								if (settings.getKeepTime() * 10 < System.currentTimeMillis() - im.getValue()) {
+									String mes = "{\"type\": \"ping\", \"data\": {}}";
+									send(im.getKey(), mes);
+								}
 							}
 
-							String mes = this.needUpdateGpio ? cmd : "{\"type\": \"ping\", \"data\": {}}";
-							this.needUpdateGpio = false;
-
-							send(w, mes);
-
-							lastSend = System.currentTimeMillis();
-							System.out.println("Send " + imei);
 						}
 					} catch (IOException | InterruptedException e) {
 						System.out.println("err1: " + e.getMessage());
@@ -55,6 +68,12 @@ public class Router extends Modem {
 				t.start();
 
 				try {
+
+					for (String im : lastSends.keySet()) {
+						for (String h : hm) 
+							send(im, h);
+					}
+
 					while (!connected.get()) {
 						Thread.sleep(5 * 1000);
 					}
@@ -65,11 +84,6 @@ public class Router extends Modem {
 				}
 
 				t.interrupt();
-
-				nc.destroy();
-				if (nc.isAlive()) {
-				    nc.destroyForcibly();
-				}
 			} catch (IOException e) {
 				System.out.println("err3: " + e.getMessage());
 				log("ROUTER: SOCKET FAILURE");
@@ -78,10 +92,8 @@ public class Router extends Modem {
 		}
 	}
 
-	@Override
-	public void sendCommand(String s) {
-		this.needUpdateGpio = true;
-		this.cmd = s;
+	public static void sendCommand(String imei, String s) throws IOException, InterruptedException {
+		send(imei, s);
 	}
 
 	@Override
@@ -91,21 +103,39 @@ public class Router extends Modem {
 				"{\"type\": \"interfaces\", \"data\": {\"loopback\": {\"rx_bytes\": \"0.01Mb\", \"proto\": \"static\", \"metric\": \"0\", \"tx_bytes\": \"0.01Mb\", \"device\": \"lo\", \"active\": 1, \"uptime\": \"00h 09m 00s\", \"ipv4\": \"127.0.0.1/8\", \"mac\": \"00:00:00:00:00:00\"}, \"lan\": {\"rx_bytes\": \"0.03Mb\", \"proto\": \"static\", \"metric\": \"0\", \"tx_bytes\": \"0.20Mb\", \"device\": \"br-lan\", \"active\": 1, \"uptime\": \"00h 09m 00s\", \"ipv4\": \"192.168.1.1/24\", \"mac\": \"f0:81:af:02:ac:12\"}, \"sim1\": {\"rx_bytes\": \"0.01Mb\", \"proto\": \"mobile\", \"metric\": \"103\", \"imei\": \"865546044124887\", \"iccid\": \"89701012417859028663\", \"tx_bytes\": \"0.01Mb\", \"active\": 1, \"module\": \"QUECTEL EC25\", \"csq\": \"31\", \"device\": \"sim1\", \"revision\": \"EC25EUGAR06A03M4G\", \"network\": \"25001\", \"operator\": \"MTS RUS MTS RUS\", \"uptime\": \"00h 07m 19s\", \"mode\": \"4G\", \"ipv4\": \"10.152.29.213/30\", \"mac\": \"00:00:00:00:00:00\"}}}";
 	}
 
-	private void send(OutputStream w, String mes) throws IOException {
+	private static synchronized void send(String imei, String mes) throws IOException, InterruptedException {
 		String s = imei + "@";
 
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		// Process nc = null;
+		// String[] cmds = new String[] {"nc", "-u", sets.getHostMainServer(), String.valueOf(sets.getPortMainServer())};
+		// ProcessBuilder pb = new ProcessBuilder(cmds);
+		// nc = pb.start();
+		// nc = Runtime.getRuntime().exec(cmds);
 
-		try (GZIPOutputStream gzip = new GZIPOutputStream(baos)) {
-			gzip.write(mes.getBytes());
-		}
+		// try (OutputStream w = nc.getOutputStream()) {
 
-		byte[] m = baos.toByteArray();
-		baos.close();
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
-		w.write(s.getBytes());
-		w.write(m);
-		w.flush();
+			baos.write(s.getBytes());
+
+			try (GZIPOutputStream gzip = new GZIPOutputStream(baos)) {
+				gzip.write(mes.getBytes());
+			}
+
+			byte[] m = baos.toByteArray();
+			baos.close();
+
+			w.write(m);
+			w.flush();
+		// }
+
+		// nc.destroyForcibly();
+
+		lastSends.put(imei, System.currentTimeMillis());
+		
+		System.out.println("Send [" + imei + "]");
+
+		Thread.sleep(100);
 	}
 	
 }

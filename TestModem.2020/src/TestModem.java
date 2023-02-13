@@ -100,15 +100,23 @@ public class TestModem {
 			Logger logger = new Logger("logs/VM.txt", false);
 			
 			try {
+				Settings settings = null;
 				
 				for (long i = differenceImei; i < countModems + differenceImei; i++) {
-					Settings settings = new Settings(set);
+					settings = new Settings(set);
 					String imei = String.valueOf(1000_000_000_000_000L + i);
 					items.put(mode == 'R' ? "TEST" + imei.substring(10) : imei,
 							new Pair<String, Settings>(String.valueOf((settings.getPort() + i) % 65536), settings));
 				}
 				
 				int counter = 0;
+
+				Process nc = null;
+				if (mode == 'R') {
+					ProcessBuilder pb = new ProcessBuilder(new String[] {"nc", "-u", settings.getHostMainServer(), String.valueOf(settings.getPortMainServer())});
+					nc = pb.start();
+					Router.w = nc.getOutputStream();
+				}
 
 				for (Map.Entry<String, Pair<String, Settings>> item : items.entrySet()) {
 					if (++counter % 100 == 0) {
@@ -165,12 +173,19 @@ public class TestModem {
 						Pair<String, Settings> item = items.get(imei);
 						Pair<Modem, Server> modemPair = modems.get(imei);
 						if (item != null && modemPair != null && modemPair.getKey() != null) {
-							modemPair.getKey().sendCommand(cmd.substring(15).trim());
-							System.out.println("Send: " + cmd.substring(15).trim());
+							try {
+								Router.sendCommand(imei, cmd.substring(15).trim());
+							} catch (IOException e1) {
+								System.out.println("Unexpected exception:");
+								e1.printStackTrace();
+							}
 						}
 					} else if (command.equalsIgnoreCase("exit")) {
 						sc.close();
 						System.out.println("Bye");
+						if (mode == 'R') {
+							nc.destroyForcibly();
+						}
 						return;
 					} else {
 						System.out.println("UnsupportedOperationException [command: " + command + "]");

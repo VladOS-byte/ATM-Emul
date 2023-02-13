@@ -38,6 +38,7 @@ public class Settings {
 	private String gpio = "0000";							//gpio
 	private int keepTime = 50;								//keep alive time
 	private int channel = 0;								//Channel
+	private int gpioChangeTimeout = -1;						//time out for gpio change (<0: off; 0: random time; >5: on)
 
 	private final Random random = new Random();
 	
@@ -251,5 +252,15 @@ public class Settings {
 
 	public int getChannel() {
 		return Integer.parseInt(getOrDefault(27, String.valueOf(channel)));
+	}
+
+	public int getGpioChangeTimeout() {
+		int y = Integer.parseInt(getOrDefault(28, String.valueOf(gpioChangeTimeout)));
+
+		if (y == 0) {
+			y = random.nextInt(120);
+		}
+
+		return Integer.parseInt(getOrDefault(28, String.valueOf(gpioChangeTimeout)));
 	}
 }
