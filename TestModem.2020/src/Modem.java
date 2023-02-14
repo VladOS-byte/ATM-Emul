@@ -83,7 +83,7 @@ public class Modem {
 				
 				Thread t = new Thread(() -> {
 					try {
-						while (!socket.isClosed() && socket.getInetAddress().isReachable(5_000)) {
+						while (!socket.isClosed()) {
 							while (settings.getKeepTime() > System.currentTimeMillis() - lastSend) {
 								Thread.sleep(5000);
 
@@ -114,6 +114,7 @@ public class Modem {
 							}
 							
 						}
+
 					} catch (IOException | InterruptedException e) {
 						log("MODEM: SECOND CONNECTION FAILURE. SOCKET ANSWERED: " + e.getMessage());
 						try {
@@ -301,7 +302,6 @@ public class Modem {
 	}
 	
 	protected void log(final String message) {
-		// System.out.println(imei + ": " + message);
 		logger.log(imei, message);
 	}
 	
