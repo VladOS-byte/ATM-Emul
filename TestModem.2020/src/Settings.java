@@ -39,6 +39,7 @@ public class Settings {
 	private int keepTime = 50;								//keep alive time
 	private int channel = 0;								//Channel
 	private int gpioChangeTimeout = -1;						//time out for gpio change (<0: off; 0: random time; >5: on)
+	private int expectedGpioTimeout = 120;					//Expected GPIO change timeout [120; 2^31)
 
 	private final Random random = new Random();
 	
@@ -60,7 +61,7 @@ public class Settings {
 				mode = reader.nextLine();
 				num++;
 				if (!mode.isEmpty()) {
-					if (Pattern.matches("<[\\w|.|:|+]+>(.*)", mode)) {
+					if (Pattern.matches("<[\\w|.|:|+|-]+>(.*)", mode)) {
 						modes.add(mode.substring(1, mode.indexOf('>')));
 					} else {
 						System.out.println("WARNING! IN " + num + " LINE OF SETTINGS FOUND BAD EXPRESSION. "
@@ -258,9 +259,9 @@ public class Settings {
 		int y = Integer.parseInt(getOrDefault(28, String.valueOf(gpioChangeTimeout)));
 
 		if (y == 0) {
-			y = random.nextInt(120);
+			y = random.nextInt(Math.max(expectedGpioTimeout, Integer.parseInt(getOrDefault(29, String.valueOf(expectedGpioTimeout)))));
 		}
 
-		return Integer.parseInt(getOrDefault(28, String.valueOf(gpioChangeTimeout)));
+		return y;
 	}
 }

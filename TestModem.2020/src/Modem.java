@@ -80,7 +80,6 @@ public class Modem {
 			try (Socket socket = new Socket(settings.getHostMainServer(), settings.getPortMainServer())) {
 				socket.setTcpNoDelay(true);
 				lastSend = sender.sendMessage(socket, helloMessage(settings.isModeEncapsulation()));
-				Thread.sleep(5000);
 				
 				Thread t = new Thread(() -> {
 					try {
@@ -88,8 +87,8 @@ public class Modem {
 							while (settings.getKeepTime() > System.currentTimeMillis() - lastSend) {
 								Thread.sleep(5000);
 
-								if (System.currentTimeMillis() - gpioLastSend > settings.getGpioChangeTimeout() * 1000
-									&& settings.getGpioChangeTimeout() > 0) {
+								int timeout = settings.getGpioChangeTimeout() * 1000;
+								if (System.currentTimeMillis() - gpioLastSend > timeout && timeout > 0) { 
 									needUpdateGpio = true;
 									settings.setGpioX(random.nextInt(3) + 1, random.nextInt(3));
 								}

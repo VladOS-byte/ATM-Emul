@@ -27,3 +27,4 @@
 <50>						//Control timer [10; 120] {no any guarantees} = double keep alive. 50 = disable double
 <1>						//Channel {-1;[1-5]} -1 = NA
 <-1>						//time out for gpio change (<0: off; 0: random time; >5: on)
+<120>						//expected random time 
