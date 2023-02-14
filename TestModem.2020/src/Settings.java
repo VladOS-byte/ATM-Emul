@@ -259,7 +259,8 @@ public class Settings {
 		int y = Integer.parseInt(getOrDefault(28, String.valueOf(gpioChangeTimeout)));
 
 		if (y == 0) {
-			y = random.nextInt(Math.max(expectedGpioTimeout, Integer.parseInt(getOrDefault(29, String.valueOf(expectedGpioTimeout)))));
+			int e = Math.max(expectedGpioTimeout, Integer.parseInt(getOrDefault(29, String.valueOf(expectedGpioTimeout))));
+			y = e + random.nextInt(120);
 		}
 
 		return y;
