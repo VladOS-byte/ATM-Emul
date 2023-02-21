@@ -14,7 +14,7 @@ public class Router extends Modem {
 	public static final AtomicBoolean staticRouter = new AtomicBoolean();
 	public static final AtomicBoolean connected = new AtomicBoolean();
 	protected String cmd = "";
-	public static OutputStream w;
+	public static DatagramSocket w;
 	private static final Map<String, Long> lastSends = new ConcurrentHashMap<>();
 	private static Settings sets;
 
@@ -125,8 +125,14 @@ public class Router extends Modem {
 			byte[] m = baos.toByteArray();
 			baos.close();
 
-			w.write(m);
-			w.flush();
+
+
+			DatagramPacket packet = new DatagramPacket(m, m.length, 
+				InetAddress.getByName(sets.getHostMainServer()), sets.getPortMainServer());
+
+			w.send(packet);
+			// w.write(m);
+			// w.flush();
 		// }
 
 		// nc.destroyForcibly();

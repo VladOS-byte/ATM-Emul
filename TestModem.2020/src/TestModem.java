@@ -3,6 +3,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
 import java.util.regex.Pattern;
+import java.net.DatagramSocket;
 
 public class TestModem {
 
@@ -113,9 +114,10 @@ public class TestModem {
 
 				Process nc = null;
 				if (mode == 'R') {
-					ProcessBuilder pb = new ProcessBuilder(new String[] {"nc", "-u", settings.getHostMainServer(), String.valueOf(settings.getPortMainServer())});
-					nc = pb.start();
-					Router.w = nc.getOutputStream();
+					//ProcessBuilder pb = new ProcessBuilder(new String[] {"nc", "-u", settings.getHostMainServer(), String.valueOf(settings.getPortMainServer())});
+					//nc = pb.start();
+					// Router.w = nc.getOutputStream();
+					Router.w = new DatagramSocket();
 				}
 
 				for (Map.Entry<String, Pair<String, Settings>> item : items.entrySet()) {
@@ -183,8 +185,12 @@ public class TestModem {
 					} else if (command.equalsIgnoreCase("exit")) {
 						sc.close();
 						System.out.println("Bye");
-						if (mode == 'R') {
-							nc.destroyForcibly();
+						if (mode == 'R') { 
+							if (nc != null) {
+								nc.destroyForcibly();
+							} else {
+								Router.w.close();
+							}
 						}
 						return;
 					} else {
