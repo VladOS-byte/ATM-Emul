@@ -141,7 +141,7 @@ public class Router extends Modem {
 		
 		System.out.println("Send [" + imei + "]");
 
-		Thread.sleep(100);
+		Thread.sleep(1);
 	}
 	
 }
