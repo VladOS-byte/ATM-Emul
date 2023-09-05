@@ -98,9 +98,10 @@ public class Router extends Modem {
 
 	@Override
 	protected String helloMessage(final boolean modeEncapsulation) {
-		return "{\"type\": \"board\", \"data\": {\"version\": \"200600\", \"hostname\": \"iRZ-Router\", \"model\": \"RT211w\", \"kernel\": \"4.14.162\", \"ram\": \"75.01Mb/122.06Mb\", \"uptime\": \"00h 09m 36s\", \"localtime\": \"2023-02-03 11:06:56 (GMT+3)\", \"remember\": \"TEST\"}}\n" +
-				"{\"type\": \"routing\", \"data\": [{\"interfaces\": [\"sim1\"], \"mode\": \"backup\"}, {\"metric\": \"3\", \"target\": \"0.0.0.0/0\", \"interface\": \"sim1\"}, {\"metric\": \"103\", \"target\": \"10.152.29.212/30\", \"interface\": \"sim1\"}, {\"metric\": \"103\", \"target\": \"10.152.29.214/32\", \"interface\": \"sim1\"}, {\"metric\": \"0\", \"target\": \"192.168.1.0/24\", \"interface\": \"lan\"}]}\n" + 
-				"{\"type\": \"interfaces\", \"data\": {\"loopback\": {\"rx_bytes\": \"0.01Mb\", \"proto\": \"static\", \"metric\": \"0\", \"tx_bytes\": \"0.01Mb\", \"device\": \"lo\", \"active\": 1, \"uptime\": \"00h 09m 00s\", \"ipv4\": \"127.0.0.1/8\", \"mac\": \"00:00:00:00:00:00\"}, \"lan\": {\"rx_bytes\": \"0.03Mb\", \"proto\": \"static\", \"metric\": \"0\", \"tx_bytes\": \"0.20Mb\", \"device\": \"br-lan\", \"active\": 1, \"uptime\": \"00h 09m 00s\", \"ipv4\": \"192.168.1.1/24\", \"mac\": \"f0:81:af:02:ac:12\"}, \"sim1\": {\"rx_bytes\": \"0.01Mb\", \"proto\": \"mobile\", \"metric\": \"103\", \"imei\": \"865546044124887\", \"iccid\": \"89701012417859028663\", \"tx_bytes\": \"0.01Mb\", \"active\": 1, \"module\": \"QUECTEL EC25\", \"csq\": \"31\", \"device\": \"sim1\", \"revision\": \"EC25EUGAR06A03M4G\", \"network\": \"25001\", \"operator\": \"MTS RUS MTS RUS\", \"uptime\": \"00h 07m 19s\", \"mode\": \"4G\", \"ipv4\": \"10.152.29.213/30\", \"mac\": \"00:00:00:00:00:00\"}}}";
+		return "{\"type\": \"board\", \"data\": {\"version\": \"" + sets.getVer() + "\", \"hostname\": \"iRZ-Router\", \"model\": \"" + sets.getDev() + "\", \"kernel\": \"" + sets.getBld() + "\", \"ram\": \"75.01Mb/122.06Mb\", \"uptime\": \"00h 09m 36s\", \"localtime\": \"2023-02-03 11:06:56 (GMT+3)\", \"remember\": \"TEST\"}}\n" +
+				"{\"type\": \"routing\", \"data\": [{\"interfaces\": [\"sim" + sets.getSim() + "\"], \"mode\": \"backup\"}, {\"metric\": \"3\", \"target\": \"0.0.0.0/0\", \"interface\": \"sim" + sets.getSim() + "\"}, {\"metric\": \"103\", \"target\": \"10.152.29.212/30\", \"interface\": \"sim" + sets.getSim() + "\"}, {\"metric\": \"103\", \"target\": \"10.152.29.214/32\", \"interface\": \"sim" + sets.getSim() + "\"}, {\"metric\": \"0\", \"target\": \"192.168.1.0/24\", \"interface\": \"lan\"}]}\n" + 
+				"{\"type\": \"interfaces\", \"data\": {\"loopback\": {\"rx_bytes\": \"0.01Mb\", \"proto\": \"static\", \"metric\": \"0\", \"tx_bytes\": \"0.01Mb\", \"device\": \"lo\", \"active\": 1, \"uptime\": \"00h 09m 00s\", \"ipv4\": \"127.0.0.1/8\", \"mac\": \"00:00:00:00:00:00\"}, \"lan\": {\"rx_bytes\": \"0.03Mb\", \"proto\": \"static\", \"metric\": \"0\", \"tx_bytes\": \"0.20Mb\", \"device\": \"br-lan\", \"active\": 1, \"uptime\": \"00h 09m 00s\", \"ipv4\": \"192.168.1.1/24\", \"mac\": \"f0:81:af:02:ac:12\"}, \"sim" + sets.getSim() + "\": {\"rx_bytes\": \"0.01Mb\", \"proto\": \"mobile\", \"metric\": \"103\", \"imei\": \"865546044124887\", \"iccid\": \"89701012417859028663\", \"tx_bytes\": \"0.01Mb\", \"active\": 1, \"module\": \"QUECTEL EC25\", \"csq\": \"" + sets.getCsq() + "\", \"device\": \"sim" + sets.getSim() + "\", \"revision\": \"EC25EUGAR06A03M4G\", \"network\": \"25001\", \"operator\": \"MTS RUS MTS RUS\", \"uptime\": \"00h 07m 19s\", \"mode\": \"" + sets.getTyp() + "\", \"ipv4\": \"10.152.29.213/30\", \"mac\": \"00:00:00:00:00:00\"}}}\n" + 
+				"{\"type\": \"status\", \"data\": {\"cpu\": {\"idle\": \"90%\", \"io\": \"0%\", \"irq\": \"0%\", \"nic\": \"0%\", \"sirq\": \"0%\", \"sys\": \"9%\", \"usr\": \"0%\"}, \"memory\": {\"free\": \"74588KiB\", \"total\": \"124992KiB\"}, \"uptime\": \"00h 09m 36s\", \"localtime\": \"2023-02-03 11:06:56 (GMT+3)\"}}";
 	}
 
 	private static synchronized void send(String imei, String mes) throws IOException, InterruptedException {
@@ -113,6 +114,7 @@ public class Router extends Modem {
 		// nc = Runtime.getRuntime().exec(cmds);
 
 		// try (OutputStream w = nc.getOutputStream()) {
+		DatagramSocket w = new DatagramSocket();
 
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
@@ -135,13 +137,14 @@ public class Router extends Modem {
 			// w.flush();
 		// }
 
+		w.close();
 		// nc.destroyForcibly();
 
 		lastSends.put(imei, System.currentTimeMillis());
 		
 		System.out.println("Send [" + imei + "]");
 
-		Thread.sleep(1);
+		Thread.sleep(10);
 	}
 	
 }

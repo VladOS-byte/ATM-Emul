@@ -80,7 +80,7 @@ public class Settings {
 		answers.put((Byte)(byte)0x01, new Pair<>(new byte[] {(byte)0x0C,(byte) 0x00, (byte)0x04, (byte)0x01, (byte)0x40, (byte)0x01, (byte) ((char) getCsq())}, null));
 	
 		answers.put((Byte)(byte)0x02, new Pair<>(
-				new byte[] {(byte)0x0C, (byte)0x00, (byte)0x07, (byte)0x01, (byte)0x40, (byte)0x02, getGPIO(1), getGPIO(2), getGPIO(3), getGPIO(4)}, null));
+				new byte[] {(byte)0x0C, (byte)0x00, (byte)0x07, (byte)0x01, (byte)0x40, (byte)0x02, getGPIO(1), getGPIO(2), getGPIO(3), getGPIO(4), (byte)0x82}, null));
 		
 		answers.put((Byte)(byte)0x03, new Pair<>(new byte[] {(byte)0x0C, (byte)0x00, (byte)0x04,(byte) 0x01, (byte)0x40, (byte)0x03, (byte)0x3F}, null));
 		

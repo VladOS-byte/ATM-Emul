@@ -1,7 +1,7 @@
 <5492>						//Password
-<ATM>						//Type of device
-<ATM31>						//Device
-<01>						//Version of firmware
+<2G>						//Type of network
+<RL21>						//Device
+<20310>						//Version of firmware
 <03>						//Version of revision
 <016.353>					//Build
 <2.0>						//HW
@@ -9,7 +9,7 @@
 <0>						//CSQ (1-31); 0 - random
 <1.1>						//ATP?
 <485+232>					//Interface
-<192.168.245.99>				//Host IRZ Collector
+<192.168.245.93>				//Host IRZ Collector
 <11003>						//Port IRZ Collector
 <true>						//Mode of encapsulation
 <true>						//Mode server
